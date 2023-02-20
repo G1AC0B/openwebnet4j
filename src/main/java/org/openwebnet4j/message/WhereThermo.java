@@ -39,15 +39,26 @@ public class WhereThermo extends Where {
     private final int probe;
     private final int actuator;
     private final boolean standalone;
+    private final int centralUnitId;
 
     public WhereThermo(String w) throws NullPointerException, IllegalArgumentException {
         super(w);
-        int z, p = -1, a = -1;
+        int z, p = -1, a = -1, c = -1;
         int pos = whereStr.indexOf("#");
         if (pos >= 0) { // # is present
-            if (pos == 0) { // case '#x'
+            if (pos == 0) {
                 standalone = false;
-                z = Integer.parseInt(whereStr.substring(1));
+                int pos2 = whereStr.indexOf("#", 1);
+                if (pos2 < 0) { // case '#x'
+                    z = Integer.parseInt(whereStr.substring(1));
+                } else { // case '#x#y'
+                    z = Integer.parseInt(whereStr.substring(1, pos2));
+                }
+                if (z == 0) { // central unit
+                    if (pos2 > 0) { // 4 zone central unit
+                        c = Integer.parseInt(whereStr.substring(pos2 + 1));
+                    }
+                }
             } else { // case 'x#x'
                 standalone = true;
                 z = Integer.parseInt(whereStr.substring(0, pos));
@@ -69,6 +80,10 @@ public class WhereThermo extends Where {
         } else {
             throw new IllegalArgumentException("WHERE address '" + w + "' is invalid: zone not in range [0-99]");
         }
+        centralUnitId = c;
+        if (c < -1 || c > 9 || c == 0) {
+            throw new IllegalArgumentException("WHERE address '" + w + "' is invalid: central unit id not in range [1-9]");
+        }
         probe = p;
         if (p < -1 || p > 9) {
             throw new IllegalArgumentException("WHERE address '" + w + "' is invalid: probe not in range [0-9]");
@@ -86,6 +101,16 @@ public class WhereThermo extends Where {
      */
     public int getZone() {
         return zone;
+    }
+
+    /**
+     * Returns the Central Unit ID for this WHERE.
+     * [1-9] in case of 4-zone central unit, -1 otherwise
+     *
+     * @return int Central Unit ID (1-9) for this WHERE
+     */
+    public int getCentralUnitId() {
+        return centralUnitId;
     }
 
     /**
@@ -117,7 +142,7 @@ public class WhereThermo extends Where {
     }
 
     /**
-     * Returns true if WHERE is Central Unit (where=<code>#0</code>)
+     * Returns true if WHERE is Central Unit (where=<code>#0</code> or where=<code>#0#[1-9]</code>)
      *
      * @return true if Central Unit
      */

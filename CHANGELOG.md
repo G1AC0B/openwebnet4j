@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.11.0] - 2023-xx-xx
+- WereThermo: Added support for 4-zone central units with id (e.g.: #0#1)
+
 ## [0.10.0] - 2023-xx-xx
 
 ### Added

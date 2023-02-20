@@ -14,8 +14,6 @@
  */
 package org.openwebnet4j.test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openwebnet4j.message.Alarm;
@@ -45,6 +43,13 @@ import org.openwebnet4j.message.WhereLightAutom;
 import org.openwebnet4j.message.WhereThermo;
 import org.openwebnet4j.message.WhereZigBee;
 import org.openwebnet4j.message.Who;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link BaseOpenMessage} and subclasses.
@@ -200,9 +205,12 @@ public class MessageTest {
             assertNotNull(thermoMsg);
             assertTrue(thermoMsg.getWhere() instanceof WhereThermo);
             WhereThermo wt = (WhereThermo) (thermoMsg.getWhere());
+            assertTrue(wt.isStandalone());
+            assertFalse(wt.isCentralUnit());
             assertEquals(1, wt.getZone());
             assertEquals(-1, wt.getProbe());
             assertEquals(1, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
 
             wt = new WhereThermo("2");
             assertTrue(wt.isStandalone());
@@ -211,6 +219,7 @@ public class MessageTest {
             assertEquals(-1, wt.getProbe());
             assertFalse(wt.isProbe());
             assertEquals(-1, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
             wt = new WhereThermo("002");
             assertTrue(wt.isStandalone());
             assertFalse(wt.isCentralUnit());
@@ -218,6 +227,7 @@ public class MessageTest {
             assertEquals(0, wt.getProbe());
             assertTrue(wt.isProbe());
             assertEquals(-1, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
             wt = new WhereThermo("500");
             assertTrue(wt.isStandalone());
             assertFalse(wt.isCentralUnit());
@@ -225,6 +235,7 @@ public class MessageTest {
             assertEquals(5, wt.getProbe());
             assertTrue(wt.isProbe());
             assertEquals(-1, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
             wt = new WhereThermo("202");
             assertTrue(wt.isStandalone());
             assertFalse(wt.isCentralUnit());
@@ -232,6 +243,7 @@ public class MessageTest {
             assertEquals(2, wt.getProbe());
             assertTrue(wt.isProbe());
             assertEquals(-1, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
             wt = new WhereThermo("0");
             assertTrue(wt.isStandalone());
             assertFalse(wt.isCentralUnit());
@@ -239,6 +251,7 @@ public class MessageTest {
             assertEquals(-1, wt.getProbe());
             assertFalse(wt.isProbe());
             assertEquals(-1, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
             wt = new WhereThermo("#0");
             assertFalse(wt.isStandalone());
             assertTrue(wt.isCentralUnit());
@@ -246,6 +259,7 @@ public class MessageTest {
             assertEquals(-1, wt.getProbe());
             assertFalse(wt.isProbe());
             assertEquals(-1, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
             wt = new WhereThermo("#1");
             assertFalse(wt.isStandalone());
             assertFalse(wt.isCentralUnit());
@@ -253,6 +267,7 @@ public class MessageTest {
             assertEquals(-1, wt.getProbe());
             assertFalse(wt.isProbe());
             assertEquals(-1, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
             wt = new WhereThermo("#34");
             assertFalse(wt.isStandalone());
             assertFalse(wt.isCentralUnit());
@@ -260,6 +275,7 @@ public class MessageTest {
             assertEquals(-1, wt.getProbe());
             assertFalse(wt.isProbe());
             assertEquals(-1, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
             wt = new WhereThermo("5#8");
             assertTrue(wt.isStandalone());
             assertFalse(wt.isCentralUnit());
@@ -267,6 +283,7 @@ public class MessageTest {
             assertEquals(-1, wt.getProbe());
             assertFalse(wt.isProbe());
             assertEquals(8, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
             wt = new WhereThermo("99#0");
             assertTrue(wt.isStandalone());
             assertFalse(wt.isCentralUnit());
@@ -274,6 +291,8 @@ public class MessageTest {
             assertEquals(-1, wt.getProbe());
             assertFalse(wt.isProbe());
             assertEquals(0, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
+            assertEquals(-1, wt.getCentralUnitId());
             wt = new WhereThermo("0#0");
             assertTrue(wt.isStandalone());
             assertFalse(wt.isCentralUnit());
@@ -281,6 +300,15 @@ public class MessageTest {
             assertEquals(-1, wt.getProbe());
             assertFalse(wt.isProbe());
             assertEquals(0, wt.getActuator());
+            assertEquals(-1, wt.getCentralUnitId());
+            wt = new WhereThermo("#0#1");
+            assertFalse(wt.isStandalone());
+            assertTrue(wt.isCentralUnit());
+            assertEquals(0, wt.getZone());
+            assertEquals(-1, wt.getProbe());
+            assertFalse(wt.isProbe());
+            assertEquals(-1, wt.getActuator());
+            assertEquals(1, wt.getCentralUnitId());
 
             try {
                 wt = new WhereThermo("1#12");
